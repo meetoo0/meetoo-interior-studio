@@ -28,9 +28,8 @@ export default function Home() {
     <section className="work section-pad" id="work"><div className="section-heading"><div><p className="eyebrow">A SELECTION OF SPACES</p><h2>Designed to <em>stay with you.</em></h2></div><p className="heading-note">A growing collection of interiors,<br/>ideas and design explorations.</p></div>
       <div className="project-list">{projects.map((p, i) => <article className={i === 1 ? "project reverse" : "project"} key={p.n}>
         <div className="project-visual"><img src={p.image} alt="Interior visual reference"/><span>{p.n}</span></div>
-        <div className="project-copy"><p className="eyebrow">{p.type}</p><h3>{p.title}</h3><p>{p.copy}</p><small>{p.tag} · REFERENCE IMAGE</small></div>
+        <div className="project-copy"><p className="eyebrow">{p.type}</p><h3>{p.title}</h3><p>{p.copy}</p></div>
       </article>)}</div>
-      <p className="portfolio-note">These are temporary visual references, not completed MEETOO projects. Approved project photography and renders will replace them.</p>
     </section>
     <section className="manifesto"><p className="eyebrow pale">OUR DESIGN PHILOSOPHY</p><h2>Everything<br/>starts from<br/><em>a line.</em></h2><p className="manifesto-note">From the first sketch to the final detail, every decision has a reason.</p></section>
     <section className="services section-pad"><p className="eyebrow">WHAT WE BRING TO THE TABLE</p><div className="services-grid"><h2>Spaces made<br/>with <em>intention.</em></h2><div>{services.map((s,i)=><div className="service-row" key={s}><span>0{i+1}</span><p>{s}</p><ArrowUpRight size={15}/></div>)}</div></div></section>
