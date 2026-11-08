@@ -10,33 +10,35 @@ type RoomKind = "living" | "bedroom" | "hospitality";
 function RoomShell() {
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.04, 0]} receiveShadow>
-        <planeGeometry args={[9, 8]} />
-        <meshStandardMaterial color="#c9bba5" roughness={0.88} />
+      {/* Open-front architectural cutaway: the camera can see the whole room. */}
+      <mesh position={[0, -0.08, 0]} receiveShadow>
+        <boxGeometry args={[9, 0.16, 8]} />
+        <meshStandardMaterial color="#8a7864" roughness={0.9} />
       </mesh>
-      <mesh position={[0, 1.8, -3.95]} receiveShadow>
-        <boxGeometry args={[9, 3.7, 0.12]} />
+      <mesh position={[0, 1.82, -3.94]} receiveShadow castShadow>
+        <boxGeometry args={[9, 3.64, 0.12]} />
         <meshStandardMaterial color="#e8dfd0" roughness={0.92} />
       </mesh>
-      <mesh position={[-4.45, 1.8, 0]} receiveShadow>
-        <boxGeometry args={[0.12, 3.7, 8]} />
+      <mesh position={[-4.44, 1.82, 0]} receiveShadow castShadow>
+        <boxGeometry args={[0.12, 3.64, 8]} />
         <meshStandardMaterial color="#d9cdbb" roughness={0.92} />
       </mesh>
-      <mesh position={[0, 3.62, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[9, 8]} />
-        <meshStandardMaterial color="#eee9df" side={THREE.DoubleSide} />
+      {/* Short return wall gives the model depth without hiding the furniture. */}
+      <mesh position={[4.44, 1.82, -3.05]} receiveShadow castShadow>
+        <boxGeometry args={[0.12, 3.64, 1.78]} />
+        <meshStandardMaterial color="#d9cdbb" roughness={0.92} />
       </mesh>
-      <mesh position={[4.43, 1.65, -1.5]}>
-        <boxGeometry args={[0.08, 3.3, 3.8]} />
-        <meshStandardMaterial color="#b9aa94" roughness={0.8} />
+      <mesh position={[0, 3.68, -3.86]} receiveShadow>
+        <boxGeometry args={[8.72, 0.08, 0.08]} />
+        <meshStandardMaterial color="#b7a58e" roughness={0.75} />
       </mesh>
-      <mesh position={[4.36, 1.8, -1.5]}>
-        <boxGeometry args={[0.1, 2.7, 3.1]} />
-        <meshStandardMaterial color="#6e7773" metalness={0.15} roughness={0.25} transparent opacity={0.38} />
+      <mesh position={[-4.34, 1.82, 0]} receiveShadow>
+        <boxGeometry args={[0.08, 3.64, 7.82]} />
+        <meshStandardMaterial color="#d9cdbb" roughness={0.92} />
       </mesh>
-      <mesh position={[0, 0.02, 0]}>
-        <boxGeometry args={[9, 0.08, 8]} />
-        <meshStandardMaterial color="#8a7864" />
+      <mesh position={[0, 0.015, -3.84]}>
+        <boxGeometry args={[8.7, 0.035, 0.035]} />
+        <meshStandardMaterial color="#9c876e" />
       </mesh>
     </group>
   );
@@ -156,7 +158,7 @@ function ShowroomScene({ room }: { room: RoomKind }) {
       <RoomShell />
       {room === "living" ? <LivingRoom /> : room === "bedroom" ? <Bedroom /> : <Hospitality />}
       <ContactShadows position={[0, 0.015, 0]} opacity={0.35} scale={12} blur={2.5} far={5} />
-      <OrbitControls makeDefault target={[0, 1, -0.7]} minDistance={5.3} maxDistance={10.5} minPolarAngle={0.72} maxPolarAngle={1.48} enablePan={false} autoRotate autoRotateSpeed={0.32} />
+      <OrbitControls makeDefault target={[0, 1.05, -0.35]} minDistance={7} maxDistance={13} minPolarAngle={0.68} maxPolarAngle={1.35} enablePan={false} autoRotate autoRotateSpeed={0.32} />
     </>
   );
 }
@@ -179,7 +181,7 @@ export default function InteractiveShowroom() {
       <div className="showroom-frame">
         <div className="showroom-canvas">
           <Suspense fallback={<div className="showroom-loading">Preparing the space…</div>}>
-            <Canvas shadows camera={{ position: [6.7, 4.4, 7.6], fov: 38 }} dpr={[1, 1.7]}>
+            <Canvas shadows camera={{ position: [9.2, 6.4, 11.5], fov: 43 }} dpr={[1, 1.7]}>
               <ShowroomScene room={room} />
             </Canvas>
           </Suspense>
