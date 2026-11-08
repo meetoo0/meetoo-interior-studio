@@ -38,7 +38,7 @@ function makeFinishTexture(finish: Finish) {
   texture.needsUpdate = true;
   return texture;
 }
-function Box({ position, size, color, roughness = 0.75, metalness = 0, castShadow = true, finish }: {
+function Box({ position, size, color, roughness = 0.75, metalness = 0, castShadow = true, finish, emissive }: {
   position: [number, number, number]; size: [number, number, number]; color: string;
   roughness?: number; metalness?: number; castShadow?: boolean; finish?: Finish; emissive?: string;
 }) {
