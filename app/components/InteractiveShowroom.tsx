@@ -40,12 +40,12 @@ function makeFinishTexture(finish: Finish) {
 }
 function Box({ position, size, color, roughness = 0.75, metalness = 0, castShadow = true, finish }: {
   position: [number, number, number]; size: [number, number, number]; color: string;
-  roughness?: number; metalness?: number; castShadow?: boolean; finish?: Finish;
+  roughness?: number; metalness?: number; castShadow?: boolean; finish?: Finish; emissive?: string;
 }) {
   const map = useMemo(() => finish ? makeFinishTexture(finish) : undefined, [finish]);
   return <mesh position={position} castShadow={castShadow} receiveShadow>
     <boxGeometry args={size} />
-    <meshStandardMaterial color={color} map={map} roughness={roughness} metalness={metalness} />
+    <meshStandardMaterial color={color} map={map} roughness={roughness} metalness={metalness} emissive={emissive ?? "#000000"} emissiveIntensity={emissive ? 1.35 : 0} />
   </mesh>;
 }
 
@@ -55,8 +55,31 @@ function RoomShell({ wall = "#687052", floor = "#b5a38b" }: { wall?: string; flo
     <Box position={[0, 1.82, -3.94]} size={[9, 3.64, 0.14]} color={wall} roughness={0.94} finish="plaster" />
     <Box position={[-4.44, 1.82, 0]} size={[0.14, 3.64, 8]} color={wall} roughness={0.94} />
     <Box position={[4.44, 1.82, -3.1]} size={[0.14, 3.64, 1.7]} color={wall} roughness={0.94} />
-    {/* A partial ceiling/soffit keeps the cutaway readable while showing ceiling design. */}
-    <Box position={[0, 3.68, -3.05]} size={[8.8, 0.12, 1.7]} color="#e7e1d6" roughness={0.82} />
+    {/* Architectural ceiling: a deep cutaway canopy with layered cove and recessed lighting. */}
+    <group>
+      <Box position={[0, 3.68, -2.05]} size={[8.8, 0.16, 3.75]} color="#e5e0d6" roughness={0.86} />
+      <Box position={[0, 3.575, -2.05]} size={[6.7, 0.035, 2.75]} color="#d2cbbd" roughness={0.9} />
+      {/* stepped perimeter bulkhead */}
+      <Box position={[0, 3.49, -0.28]} size={[8.8, 0.22, 0.16]} color="#c9c0b1" />
+      <Box position={[-4.28, 3.49, -2.05]} size={[0.18, 0.22, 3.55]} color="#c9c0b1" />
+      <Box position={[4.28, 3.49, -2.05]} size={[0.18, 0.22, 3.55]} color="#c9c0b1" />
+      {/* warm recessed cove-light channels */}
+      <Box position={[-3.78, 3.585, -2.05]} size={[0.035, 0.018, 3.15]} color="#fff0d2" emissive="#ffe0a6" />
+      <Box position={[3.78, 3.585, -2.05]} size={[0.035, 0.018, 3.15]} color="#fff0d2" emissive="#ffe0a6" />
+      <Box position={[0, 3.585, -3.72]} size={[7.55, 0.018, 0.035]} color="#fff0d2" emissive="#ffe0a6" />
+      <Box position={[0, 3.585, -0.38]} size={[7.55, 0.018, 0.035]} color="#fff0d2" emissive="#ffe0a6" />
+      {/* three clean linear LED slots */}
+      {[-1.15, 0, 1.15].map((x) => <Box key={x} position={[x, 3.59, -2.05]} size={[0.045, 0.02, 2.9]} color="#fff7e8" emissive="#fff0d0" />)}
+      {/* recessed downlights */}
+      {[[-3.05, -3.05], [-1.55, -3.05], [0, -3.05], [1.55, -3.05], [3.05, -3.05], [-3.05, -1.05], [3.05, -1.05]].map(([x,z], i) => (
+        <group key={i} position={[x, 3.585, z]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.105, 0.105, 0.025, 24]} />
+            <meshStandardMaterial color="#f8f3e8" emissive="#fff0d2" emissiveIntensity={0.8} />
+          </mesh>
+        </group>
+      ))}
+    </group>
     <Box position={[0, 0.025, -3.82]} size={[8.7, 0.045, 0.045]} color="#9b8062" />
   </group>;
 }
@@ -180,7 +203,7 @@ function ShowroomScene({ room }: { room: RoomKind }) {
     <pointLight position={[-2, 2.8, -2]} intensity={0.7} color="#f5d5a5" />
     {room === "living" ? <LivingRoom /> : room === "bedroom" ? <Bedroom /> : <Hospitality />}
     <ContactShadows position={[0, 0.015, 0]} opacity={0.32} scale={13} blur={2.8} far={5} />
-    <OrbitControls makeDefault target={[0, 1.25, -0.55]} minDistance={7} maxDistance={13} minPolarAngle={0.62} maxPolarAngle={1.36} enablePan={false} autoRotate autoRotateSpeed={0.22} />
+    <OrbitControls makeDefault target={[0, 1.25, -0.55]} minDistance={7} maxDistance={13} minPolarAngle={0.82} maxPolarAngle={1.55} enablePan={false} autoRotate autoRotateSpeed={0.22} />
   </>;
 }
 
@@ -200,7 +223,7 @@ export default function InteractiveShowroom() {
     <div className="showroom-frame">
       <div className="showroom-canvas">
         <Suspense fallback={<div className="showroom-loading">Preparing the space…</div>}>
-          <Canvas shadows camera={{ position: [9.2, 6.2, 11.5], fov: 43 }} dpr={[1, 1.6]}>
+          <Canvas shadows camera={{ position: [9.2, 3.15, 11.5], fov: 43 }} dpr={[1, 1.6]}>
             <ShowroomScene room={room} />
           </Canvas>
         </Suspense>
