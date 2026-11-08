@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUpRight } from "lucide-react";
-import InteractiveShowroom from "./components/InteractiveShowroom";
+import ShowroomClient from "./components/ShowroomClient";
 
 const projects = [
   { n: "01", type: "RESIDENTIAL · LIVING", title: "A quieter kind of luxury.", copy: "Warm timber, tactile finishes and soft, considered light come together to create a place to slow down.", image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1800&q=85" },
@@ -23,7 +23,7 @@ export default function Home() {
       </div><span className="hero-caption">A CONSIDERED APPROACH TO INTERIORS</span>
     </section>
 
-    <InteractiveShowroom />
+    <ShowroomClient />
 
     <section className="intro section-pad" id="approach"><p className="eyebrow">THE MEETOO POINT OF VIEW</p><div className="intro-grid">
       <h2>Good design is<br/>felt <em>before</em><br/>it is explained.</h2>
