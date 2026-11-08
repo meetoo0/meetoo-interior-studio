@@ -3,7 +3,6 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, ContactShadows } from "@react-three/drei";
 import { Suspense, useState } from "react";
-import * as THREE from "three";
 
 type RoomKind = "living" | "bedroom" | "hospitality";
 
