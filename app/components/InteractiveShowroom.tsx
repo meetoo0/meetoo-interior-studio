@@ -9,33 +9,33 @@ type RoomKind = "living" | "bedroom" | "hospitality";
 
 type Finish = "plaster" | "walnut" | "stone" | "fabric" | "timber" | "concrete";
 function makeFinishTexture(finish: Finish) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512; canvas.height = 512;
-  const ctx = canvas.getContext("2d")!;
-  const palettes: Record<Finish, [string, string]> = {
-    plaster: ["#777b5d", "#929477"], walnut: ["#4a3020", "#986a43"],
-    stone: ["#d5cbb9", "#a99d8b"], fabric: ["#d6cbbb", "#eee8dc"],
-    timber: ["#76543a", "#b18a60"], concrete: ["#a7a197", "#c2bdb3"]
+  // DataTexture is safe during Next.js server rendering: it does not touch window or document.
+  const width = 128, height = 128;
+  const data = new Uint8Array(width * height * 4);
+  const palettes: Record<Finish, [number, number, number]> = {
+    plaster: [119, 123, 93], walnut: [91, 59, 37], stone: [199, 188, 169],
+    fabric: [220, 211, 195], timber: [132, 99, 66], concrete: [173, 168, 158]
   };
-  const [base, detail] = palettes[finish];
-  ctx.fillStyle = base; ctx.fillRect(0,0,512,512);
-  if (finish === "walnut" || finish === "timber") {
-    for (let i=0;i<95;i++) {
-      const y=Math.random()*512, h=1+Math.random()*5;
-      ctx.globalAlpha=0.12+Math.random()*0.2; ctx.fillStyle=detail;
-      ctx.fillRect(0,y,512,h);
+  const [r, g, b] = palettes[finish];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const grain = Math.sin(x * 0.31 + Math.sin(y * 0.08) * 2.2) * 5
+        + Math.sin(y * 0.17 + x * 0.025) * 2
+        + Math.sin((x + y) * 0.73) * 1.8;
+      const vein = finish === "stone" ? Math.sin(x * 0.11 + Math.sin(y * 0.045) * 8) * 9 : 0;
+      const noise = Math.sin(x * 12.9898 + y * 78.233) * 2;
+      const offset = (y * width + x) * 4;
+      data[offset] = Math.max(0, Math.min(255, r + grain + vein + noise));
+      data[offset + 1] = Math.max(0, Math.min(255, g + grain + vein + noise));
+      data[offset + 2] = Math.max(0, Math.min(255, b + grain + vein + noise));
+      data[offset + 3] = 255;
     }
-    for(let i=0;i<18;i++){ctx.globalAlpha=.12;ctx.strokeStyle="#24180f";ctx.lineWidth=1+Math.random()*3;ctx.beginPath();ctx.moveTo(Math.random()*512,0);ctx.bezierCurveTo(Math.random()*512,160,Math.random()*512,350,Math.random()*512,512);ctx.stroke();}
-  } else if (finish === "stone") {
-    for(let i=0;i<28;i++){ctx.globalAlpha=.16;ctx.strokeStyle=detail;ctx.lineWidth=1+Math.random()*2;ctx.beginPath();let x=Math.random()*512,y=0;ctx.moveTo(x,y);ctx.bezierCurveTo(x-90,160,x+100,320,x-40,512);ctx.stroke();}
-  } else {
-    for(let i=0;i<9000;i++){ctx.globalAlpha=.035+Math.random()*.06;ctx.fillStyle=detail;ctx.fillRect(Math.random()*512,Math.random()*512,1+Math.random()*3,1+Math.random()*3);}
   }
-  ctx.globalAlpha=1;
-  const texture=new THREE.CanvasTexture(canvas);
-  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
-  texture.colorSpace=THREE.SRGBColorSpace;
-  texture.anisotropy=8;
+  const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  texture.needsUpdate = true;
   return texture;
 }
 function Box({ position, size, color, roughness = 0.75, metalness = 0, castShadow = true, finish }: {
