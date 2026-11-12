@@ -37,6 +37,24 @@ export default function Home() {
       </article>)}</div>
     </section>
 
+      <p className="portfolio-note">These three images are visual references showing the kind of atmosphere and design direction MEETOO can explore. They are not photographs of completed MEETOO projects.</p>
+      <div className="real-work-slots" aria-label="Spaces for genuine MEETOO project work">
+        <article className="real-work-slot">
+          <p className="eyebrow">MEETOO PROJECT ARCHIVE · 01</p>
+          <span>3D DESIGN RENDER</span>
+          <h3>Designs brought to life in 3D.</h3>
+          <p>Approved MEETOO visualisations will be featured here, beginning with the TV wall design.</p>
+          <small>REAL MEETOO DESIGN WORK</small>
+        </article>
+        <article className="real-work-slot">
+          <p className="eyebrow">MEETOO PROJECT ARCHIVE · 02</p>
+          <span>PROJECT PHOTO</span>
+          <h3>Spaces delivered on site.</h3>
+          <p>Photography of completed installations and real project progress will be featured here.</p>
+          <small>REAL MEETOO PROJECT PHOTOGRAPHY</small>
+        </article>
+      </div>
+
     <section className="manifesto"><p className="eyebrow pale">OUR DESIGN PHILOSOPHY</p><h2>Everything<br/>starts from<br/><em>a line.</em></h2><p className="manifesto-note">From the first sketch to the final detail, every decision has a reason.</p></section>
     <section className="services section-pad"><p className="eyebrow">WHAT WE BRING TO THE TABLE</p><div className="services-grid"><h2>Spaces made<br/>with <em>intention.</em></h2><div>{services.map((s,i)=><div className="service-row" key={s}><span>0{i+1}</span><p>{s}</p><ArrowUpRight size={15}/></div>)}</div></div></section>
     <section className="contact" id="contact"><div className="contact-photo"/><div className="contact-overlay"/><div className="contact-copy"><p className="eyebrow pale">HAVE A SPACE IN MIND?</p><h2>Let's make<br/><em>something</em><br/>meaningful.</h2><p>Tell us what you are imagining. We would love to hear about the space you want to bring to life.</p><a className="contact-button" href="https://wa.me/2348141834638" target="_blank" rel="noreferrer">Talk to MEETOO on WhatsApp <ArrowUpRight size={16}/></a><a className="email" href="mailto:essienmfoniso65@gmail.com">essienmfoniso65@gmail.com</a></div></section>
