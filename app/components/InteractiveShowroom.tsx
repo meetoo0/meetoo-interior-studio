@@ -2,7 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 
 type RoomKind = "living" | "bedroom" | "hospitality";
@@ -195,6 +195,17 @@ function Hospitality() {
 }
 
 function ShowroomScene({ room }: { room: RoomKind }) {
+  const [idle, setIdle] = useState(true);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    return () => clearTimeout(timer);
+  }, []);
+  const handleInteractionStart = () => setIdle(false);
+  const handleInteractionEnd = () => {
+    setIdle(false);
+    const timer = setTimeout(() => setIdle(true), 4500);
+    return () => clearTimeout(timer);
+  };
   return <>
     <color attach="background" args={["#d6d0c5"]} />
     <ambientLight intensity={0.72} />
@@ -203,7 +214,7 @@ function ShowroomScene({ room }: { room: RoomKind }) {
     <pointLight position={[-2, 2.8, -2]} intensity={0.7} color="#f5d5a5" />
     {room === "living" ? <LivingRoom /> : room === "bedroom" ? <Bedroom /> : <Hospitality />}
     <ContactShadows position={[0, 0.015, 0]} opacity={0.32} scale={13} blur={2.8} far={5} />
-    <OrbitControls makeDefault target={[0, 1.25, -0.55]} minDistance={7} maxDistance={13} minPolarAngle={0.82} maxPolarAngle={1.55} enablePan={false} autoRotate autoRotateSpeed={0.22} />
+    <OrbitControls makeDefault target={[0, 1.25, -0.55]} minDistance={7} maxDistance={13} minPolarAngle={0.35} maxPolarAngle={1.45} minAzimuthAngle={-1.43} maxAzimuthAngle={2.78} enablePan={false} enableDamping dampingFactor={0.08} autoRotate={idle} autoRotateSpeed={0.12} onStart={handleInteractionStart} onEnd={handleInteractionEnd} />
   </>;
 }
 
