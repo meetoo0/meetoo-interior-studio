@@ -2,14 +2,18 @@
 
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 type RoomKind = "living" | "bedroom" | "hospitality";
 
 type Finish = "plaster" | "walnut" | "stone" | "fabric" | "timber" | "concrete";
+const finishTextureCache = new Map<Finish, THREE.DataTexture>();
+
 function makeFinishTexture(finish: Finish) {
-  // DataTexture is safe during Next.js server rendering: it does not touch window or document.
+  const cached = finishTextureCache.get(finish);
+  if (cached) return cached;
+  // Reuse one small procedural texture per finish instead of allocating a new texture for every object.
   const width = 128, height = 128;
   const data = new Uint8Array(width * height * 4);
   const palettes: Record<Finish, [number, number, number]> = {
@@ -34,8 +38,12 @@ function makeFinishTexture(finish: Finish) {
   const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
+  texture.anisotropy = 4;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
   texture.needsUpdate = true;
+  finishTextureCache.set(finish, texture);
   return texture;
 }
 function Box({ position, size, color, roughness = 0.75, metalness = 0, castShadow = true, finish, emissive }: {
@@ -45,7 +53,7 @@ function Box({ position, size, color, roughness = 0.75, metalness = 0, castShado
   const map = useMemo(() => finish ? makeFinishTexture(finish) : undefined, [finish]);
   return <mesh position={position} castShadow={castShadow} receiveShadow>
     <boxGeometry args={size} />
-    <meshStandardMaterial color={color} map={map} roughness={roughness} metalness={metalness} emissive={emissive ?? "#000000"} emissiveIntensity={emissive ? 1.35 : 0} />
+    <meshStandardMaterial color={color} map={map} bumpMap={map} bumpScale={finish === "fabric" ? 0.035 : finish === "stone" ? 0.022 : 0.012} roughness={roughness} metalness={metalness} emissive={emissive ?? "#000000"} emissiveIntensity={emissive ? 1.35 : 0} />
   </mesh>;
 }
 
@@ -195,15 +203,29 @@ function Hospitality() {
 }
 
 function ShowroomScene({ room }: { room: RoomKind }) {
+  const [idle, setIdle] = useState(true);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+  }, []);
+  const handleInteractionStart = () => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    setIdle(false);
+  };
+  const handleInteractionEnd = () => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => setIdle(true), 4500);
+  };
   return <>
     <color attach="background" args={["#d6d0c5"]} />
-    <ambientLight intensity={0.72} />
-    <hemisphereLight args={["#fff4df", "#746451", 0.8]} />
-    <directionalLight position={[4, 8, 6]} intensity={2.0} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
-    <pointLight position={[-2, 2.8, -2]} intensity={0.7} color="#f5d5a5" />
+    <ambientLight intensity={0.48} />
+    <hemisphereLight args={["#fff5e7", "#655746", 0.72]} />
+    <directionalLight position={[4, 8, 6]} intensity={1.65} color="#fff0d9" castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-7} shadow-camera-right={7} shadow-camera-top={7} shadow-camera-bottom={-7} shadow-bias={-0.00015} />
+    <directionalLight position={[-5, 4, 2]} intensity={0.48} color="#d8e0e8" />
+    <pointLight position={[-2, 2.8, -2]} intensity={0.52} distance={8} color="#f5d5a5" />
     {room === "living" ? <LivingRoom /> : room === "bedroom" ? <Bedroom /> : <Hospitality />}
-    <ContactShadows position={[0, 0.015, 0]} opacity={0.32} scale={13} blur={2.8} far={5} />
-    <OrbitControls makeDefault target={[0, 1.25, -0.55]} minDistance={7} maxDistance={13} minPolarAngle={0.82} maxPolarAngle={1.55} enablePan={false} autoRotate autoRotateSpeed={0.22} />
+    <ContactShadows position={[0, 0.015, 0]} opacity={0.26} scale={13} blur={3.2} far={5} />
+    <OrbitControls makeDefault target={[0, 1.25, -0.55]} minDistance={7} maxDistance={13} minPolarAngle={0.35} maxPolarAngle={1.45} minAzimuthAngle={-1.43} maxAzimuthAngle={2.78} enablePan={false} enableDamping dampingFactor={0.08} autoRotate={idle} autoRotateSpeed={0.12} onStart={handleInteractionStart} onEnd={handleInteractionEnd} />
   </>;
 }
 
@@ -223,7 +245,7 @@ export default function InteractiveShowroom() {
     <div className="showroom-frame">
       <div className="showroom-canvas">
         <Suspense fallback={<div className="showroom-loading">Preparing the space…</div>}>
-          <Canvas shadows camera={{ position: [9.2, 3.15, 11.5], fov: 43 }} dpr={[1, 1.6]}>
+          <Canvas shadows camera={{ position: [9.2, 3.15, 11.5], fov: 43 }} dpr={[1, 1.35]} gl={{ antialias: true, powerPreference: "high-performance" }}>
             <ShowroomScene room={room} />
           </Canvas>
         </Suspense>
