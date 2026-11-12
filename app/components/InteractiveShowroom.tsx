@@ -2,7 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, OrbitControls } from "@react-three/drei";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 type RoomKind = "living" | "bedroom" | "hospitality";
@@ -196,15 +196,17 @@ function Hospitality() {
 
 function ShowroomScene({ room }: { room: RoomKind }) {
   const [idle, setIdle] = useState(true);
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    return () => clearTimeout(timer);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
   }, []);
-  const handleInteractionStart = () => setIdle(false);
-  const handleInteractionEnd = () => {
+  const handleInteractionStart = () => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
     setIdle(false);
-    const timer = setTimeout(() => setIdle(true), 4500);
-    return () => clearTimeout(timer);
+  };
+  const handleInteractionEnd = () => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => setIdle(true), 4500);
   };
   return <>
     <color attach="background" args={["#d6d0c5"]} />
